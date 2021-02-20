@@ -1,5 +1,5 @@
 """
-WSGI config for simple_retail_business_api project.
+WSGI config for retail_tech_business_api project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'simple_retail_business_api.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'retail_tech_business_api.settings')
 
 application = get_wsgi_application()

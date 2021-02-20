@@ -5,7 +5,7 @@ import sys
 
 
 def main():
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'simple_retail_business_api.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'retail_tech_business_api.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
