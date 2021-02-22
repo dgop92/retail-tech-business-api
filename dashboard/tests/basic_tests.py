@@ -24,7 +24,7 @@ class DashboardBasicTests(TestBasicDashboardBase, TestCase):
                 )
 
                 self.put(
-                    get_url_func(item_id = 1), 
+                    get_url_func(item_id = int(self.json_response['pk'])), 
                     data = data, 
                     status_code = status.HTTP_200_OK,
                     token = token
@@ -57,6 +57,8 @@ class DashboardBasicTests(TestBasicDashboardBase, TestCase):
             else:
                 kwargs = {}
 
+            id_items = []
+
             for _ in range(items_to_create):
                 self.post(
                     get_url_func(), 
@@ -65,11 +67,13 @@ class DashboardBasicTests(TestBasicDashboardBase, TestCase):
                     token = token
                 )
 
+                id_items.append(int(self.json_response['pk']))
+
             if delete:
-                for i in range(1, items_to_create + 1):
+                for _id in id_items:
 
                     self.delete(
-                        get_url_func(item_id = i), 
+                        get_url_func(item_id = _id), 
                         status_code = status.HTTP_204_NO_CONTENT,
                         token = token
                     )
@@ -131,7 +135,7 @@ class DashboardBasicTests(TestBasicDashboardBase, TestCase):
             )
 
             self.put(
-                get_url_func(item_id = 1),
+                get_url_func(item_id = int(self.json_response['pk'])),
                 data = invalid_data,
                 status_code = status.HTTP_400_BAD_REQUEST,
                 token = token
@@ -344,13 +348,13 @@ class DashboardBasicTests(TestBasicDashboardBase, TestCase):
         )
 
         self.delete(
-            self.get_brand_url(item_id = 1),
+            self.get_brand_url(item_id = int(brand_data['pk'])),
             status_code = status.HTTP_423_LOCKED,
             token = token
         )
 
         self.delete(
-            self.get_catalogue_url(item_id = 1),
+            self.get_catalogue_url(item_id = int(catalogue_data['pk'])),
             status_code = status.HTTP_423_LOCKED,
             token = token
         )
@@ -376,7 +380,7 @@ class DashboardBasicTests(TestBasicDashboardBase, TestCase):
         )
 
         self.delete(
-            self.get_product_url(item_id = 1),
+            self.get_product_url(item_id = int(self.json_response['pk'])),
             status_code = status.HTTP_423_LOCKED,
             token = token
         )

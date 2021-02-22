@@ -23,6 +23,7 @@ class TestBasicDashboardBase(TestAccountBase,
             status_code = status.HTTP_201_CREATED,
             token = token
         )
+        brand_data = self.json_response
 
         catalogue_data = self.get_brand_valid_data()
 
@@ -32,6 +33,7 @@ class TestBasicDashboardBase(TestAccountBase,
             status_code = status.HTTP_201_CREATED,
             token = token
         )
+        catalogue_data = self.json_response
 
         return brand_data, catalogue_data
 

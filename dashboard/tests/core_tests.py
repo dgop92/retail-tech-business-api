@@ -34,7 +34,7 @@ class TestCoreDashboardTest(TestCoreDashboardBase, TestCase):
                 new_data = data_func_generator(**extra_data_kwargs)
 
                 self.put(
-                    get_url_func(item_id = 1), 
+                    get_url_func(item_id = int(self.json_response['pk'])), 
                     data = new_data, 
                     token = token,
                     status_code = status.HTTP_200_OK
@@ -50,6 +50,7 @@ class TestCoreDashboardTest(TestCoreDashboardBase, TestCase):
             # Post sale
 
             items_to_create = 3
+            id_items = []
 
             for _ in range(items_to_create):
                 self.post(
@@ -59,12 +60,14 @@ class TestCoreDashboardTest(TestCoreDashboardBase, TestCase):
                     status_code = status.HTTP_201_CREATED
                 )
 
+                id_items.append(int(self.json_response['pk']))
+
 
 
             if 'delete':
 
                 self.delete(
-                    get_url_func(item_id = 2),
+                    get_url_func(item_id = id_items[0]),
                     token = token,
                     status_code = status.HTTP_204_NO_CONTENT
                 )
@@ -79,6 +82,8 @@ class TestCoreDashboardTest(TestCoreDashboardBase, TestCase):
             
             self.assertEqual(self.json_response['count'], items_to_create)
     
+    # Parent here means entry and exits, and chidls purchases and sales
+
     def negative_sale_purchase_generator(self, get_url_func,
         action, **kwargs):
         
@@ -130,16 +135,24 @@ class TestCoreDashboardTest(TestCoreDashboardBase, TestCase):
 
             extra_data_args = ()
             if 'parent_post_func' in kwargs:
+                parent_ids = []  
                 parent_post_func = kwargs['parent_post_func']
-                parent_post_func(custom_token = token1)  
+                parent_post_func(custom_token = token1)
+                parent_ids.append(int(self.json_response['pk']))
                 parent_post_func(custom_token = token2)
-                extra_data_args = (1, self.product_data['code'])
+                parent_ids.append(int(self.json_response['pk']))
+                extra_data_args = (
+                    parent_ids[0], 
+                    self.product_data['code']
+                )
 
             data_func_generator = kwargs['data_func_generator']
             if 'extra_data_kwargs' not in kwargs:
                 extra_data_kwargs = {}    
             else:
                 extra_data_kwargs =  kwargs['extra_data_kwargs']
+
+            id_items = [] 
 
             self.post(
                 get_url_func(), 
@@ -150,8 +163,13 @@ class TestCoreDashboardTest(TestCoreDashboardBase, TestCase):
                 status_code = status.HTTP_201_CREATED
             )
 
+            id_items.append(int(self.json_response['pk']))
+
             if 'parent_post_func' in kwargs:
-                extra_data_args = (2, self.product_data['code'])
+                extra_data_args = (
+                    parent_ids[1], 
+                    self.product_data['code']
+                )
 
             self.post(
                 get_url_func(), 
@@ -162,10 +180,14 @@ class TestCoreDashboardTest(TestCoreDashboardBase, TestCase):
                 status_code = status.HTTP_201_CREATED
             )
 
+            id_items.append(int(self.json_response['pk']))
+
+            # testing that a user can see 1 item, but admin can see both
+
             if action == 'get':
 
                 self.get(
-                    get_url_func(item_id = 1),
+                    get_url_func(item_id = id_items[0]),
                     token = token2,
                     status_code = status.HTTP_403_FORBIDDEN
                 )
@@ -192,7 +214,7 @@ class TestCoreDashboardTest(TestCoreDashboardBase, TestCase):
             if action == 'update':
 
                 self.put(
-                    get_url_func(item_id = 1),
+                    get_url_func(item_id = id_items[0]),
                     token = token2,
                     status_code = status.HTTP_403_FORBIDDEN
                 )
@@ -201,7 +223,7 @@ class TestCoreDashboardTest(TestCoreDashboardBase, TestCase):
                 
                 # BUG is forbidden
                 self.delete(
-                    get_url_func(item_id = 2),
+                    get_url_func(item_id = id_items[1]),
                     token = token1,
                     status_code = status.HTTP_403_FORBIDDEN
                 )
@@ -226,6 +248,8 @@ class TestCoreDashboardTest(TestCoreDashboardBase, TestCase):
             status_code = status.HTTP_201_CREATED
         )
 
+        return int(self.json_response['pk'])
+
     def post_entry_for_purchase(self, custom_token = None):
 
         if not custom_token:
@@ -244,6 +268,8 @@ class TestCoreDashboardTest(TestCoreDashboardBase, TestCase):
             token = token,
             status_code = status.HTTP_201_CREATED
         )
+
+        return int(self.json_response['pk'])
 
     # Basic Positive Exits and sales Tests 
 
@@ -281,14 +307,14 @@ class TestCoreDashboardTest(TestCoreDashboardBase, TestCase):
 
     def test_create_sale(self):
 
-        self.post_exit_for_sale()
+        exit_id = self.post_exit_for_sale()
 
         self.positive_sale_purchase_generator(
             get_url_func = self.get_sale_url,
             action = 'create',
             data_func_generator = self.get_sale_valid_data,
             extra_data_kwargs = {
-                "exit_id": 1,
+                "exit_id": exit_id,
                 "product_code": self.product_data['code']
             }
         )
@@ -296,42 +322,42 @@ class TestCoreDashboardTest(TestCoreDashboardBase, TestCase):
     # NOTE you coudl create another product
     def test_update_sale(self):
 
-        self.post_exit_for_sale()
+        exit_id = self.post_exit_for_sale()
 
         self.positive_sale_purchase_generator(
             get_url_func = self.get_sale_url,
             action = 'update',
             data_func_generator = self.get_sale_valid_data,
             extra_data_kwargs = {
-                "exit_id": 1,
+                "exit_id": exit_id,
                 "product_code": self.product_data['code']
             }
         )
 
     def test_get_sale(self):
 
-        self.post_exit_for_sale()
+        exit_id = self.post_exit_for_sale()
     
         self.positive_sale_purchase_generator(
             get_url_func = self.get_sale_url,
             action = 'get',
             data_func_generator = self.get_sale_valid_data,
             extra_data_kwargs = {
-                "exit_id": 1,
+                "exit_id": exit_id,
                 "product_code": self.product_data['code']
             }
         )
 
     def test_delete_sale(self):
 
-        self.post_exit_for_sale()
+        exit_id = self.post_exit_for_sale()
 
         self.positive_sale_purchase_generator(
             get_url_func = self.get_sale_url,
             action = 'delete',
             data_func_generator = self.get_sale_valid_data,
             extra_data_kwargs = {
-                "exit_id": 1,
+                "exit_id": exit_id,
                 "product_code": self.product_data['code']
             }
         )
@@ -387,14 +413,14 @@ class TestCoreDashboardTest(TestCoreDashboardBase, TestCase):
 
     def test_create_purchase(self):
 
-        self.post_entry_for_purchase()
+        entry_id = self.post_entry_for_purchase()
 
         self.positive_sale_purchase_generator(
             get_url_func = self.get_purchase_url,
             action = 'create',
             data_func_generator = self.get_purchase_valid_data,
             extra_data_kwargs = {
-                "entry_id": 1,
+                "entry_id": entry_id,
                 "product_code": self.product_data['code'],
             }
         )
@@ -402,14 +428,14 @@ class TestCoreDashboardTest(TestCoreDashboardBase, TestCase):
 
     def test_update_purchase(self):
 
-        self.post_entry_for_purchase()
+        entry_id = self.post_entry_for_purchase()
 
         self.positive_sale_purchase_generator(
             get_url_func = self.get_purchase_url,
             action = 'update',
             data_func_generator = self.get_purchase_valid_data,
             extra_data_kwargs = {
-                "entry_id": 1,
+                "entry_id": entry_id,
                 "product_code": self.product_data['code'],
             }
         )
@@ -417,14 +443,14 @@ class TestCoreDashboardTest(TestCoreDashboardBase, TestCase):
 
     def test_get_purchase(self):
 
-        self.post_entry_for_purchase()
+        entry_id = self.post_entry_for_purchase()
 
         self.positive_sale_purchase_generator(
             get_url_func = self.get_purchase_url,
             action = 'get',
             data_func_generator = self.get_purchase_valid_data,
             extra_data_kwargs = {
-                "entry_id": 1,
+                "entry_id": entry_id,
                 "product_code": self.product_data['code'],
             }
         )
@@ -432,14 +458,14 @@ class TestCoreDashboardTest(TestCoreDashboardBase, TestCase):
 
     def test_delete_purchase(self):
 
-        self.post_entry_for_purchase()
+        entry_id = self.post_entry_for_purchase()
 
         self.positive_sale_purchase_generator(
             get_url_func = self.get_purchase_url,
             action = 'delete',
             data_func_generator = self.get_purchase_valid_data,
             extra_data_kwargs = {
-                "entry_id": 1,
+                "entry_id": entry_id,
                 "product_code": self.product_data['code'],
             }
         )
