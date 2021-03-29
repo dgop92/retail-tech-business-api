@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_auth',
+    'corsheaders',
     'django_rest_passwordreset',
 ]
 
@@ -71,6 +72,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -101,7 +103,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'retail_tech_business_api.wsgi.application'
 
-
+whitelist_str = os.environ.get('CORS_ORIGIN_WHITELIST', '')
+CORS_ALLOWED_ORIGINS = whitelist_str.split(',')
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
