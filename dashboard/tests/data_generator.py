@@ -190,6 +190,7 @@ class CoreDashboardtUrlDataGetter:
         sale_valid_data = {
             'exit': exit_id,
             'product': product_code,
+            "unit_price": "50000.00",
             'amount': amount
         }
 
@@ -212,7 +213,8 @@ class CoreDashboardtUrlDataGetter:
 
         entry_valid_data = {
             'entry': entry_id,
-            'product': product_code,
+            'product': product_code,            
+            "unit_price": "32000.00",
             'amount': amount
         }
 

@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from .models import (Brand, Catalogue, Entry, Exit, Product, Provider,
+from .models import (Brand, Catalogue, Client, Entry, Exit, Product, Provider,
                      Purchase, Sale)
 
 
@@ -107,6 +107,10 @@ class SaleSerializer(serializers.ModelSerializer):
         }
     )
 
+    sold = serializers.ReadOnlyField(
+        source='get_amount_sold'
+    )
+
     exit = serializers.SlugRelatedField(queryset=Exit.objects.all(),
 		slug_field='pk', required=True, error_messages = {
             'does_not_exist': _("Exit with id {value} doesn't exit"),
@@ -120,6 +124,8 @@ class SaleSerializer(serializers.ModelSerializer):
             'exit',
             'product',
             'amount',
+            'unit_price',
+            'sold',
         )
 
     def validate_amount(self, amount):
@@ -133,7 +139,11 @@ class SaleSerializer(serializers.ModelSerializer):
 
         curr_amount = self.instance.amount if self.instance else 0
         
-        curr_product = data['product']
+        if self.instance:
+            curr_product = self.instance.product
+        else:
+            curr_product = data['product']
+        
         amount = data['amount']
 
         curr_stock = curr_product.stock
@@ -153,6 +163,10 @@ class PurchaseSerializer(serializers.ModelSerializer):
         }
     )
 
+    spent = serializers.ReadOnlyField(
+        source='get_amount_spent'
+    )
+
     entry = serializers.SlugRelatedField(queryset=Entry.objects.all(),
 		slug_field='pk', required=True, error_messages = {
             'does_not_exist': _("Entry with id {value} doesn't exit"),
@@ -165,7 +179,9 @@ class PurchaseSerializer(serializers.ModelSerializer):
             'pk',
             'entry',
             'product',
-            'amount',
+            'amount',            
+            'unit_price',
+            'spent',
         )
 
     def validate_amount(self, amount):
@@ -181,12 +197,29 @@ class ExitSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
     exit_sales = SaleSerializer(many=True, read_only=True)
 
+    units_sold = serializers.ReadOnlyField(
+        source='get_units_sold'
+    )
+
+    total_sold = serializers.ReadOnlyField(
+        source='total_amount_sold'
+    )
+
+    client = serializers.SlugRelatedField(queryset=Client.objects.all(),
+		slug_field='tice', required=False, error_messages = {
+            'does_not_exist': _("Client with name {value} doesn't exit"),
+        }
+    )
+
     class Meta:
         model = Exit
         fields = (
             'pk',
             'created_date',
             'user',
+            'client',
+            'units_sold',
+            'total_sold',
             'exit_sales'
         )    
         read_only_fields = ('created_date', 'user')
@@ -202,6 +235,14 @@ class EntrySerializer(serializers.HyperlinkedModelSerializer):
     )
     entry_purchases = PurchaseSerializer(many=True, read_only=True)
 
+    units_bought = serializers.ReadOnlyField(
+        source='get_units_bought'
+    )
+
+    total_spent = serializers.ReadOnlyField(
+        source='total_amount_spent'
+    )
+
     class Meta:
         model = Entry
         fields = (
@@ -209,8 +250,19 @@ class EntrySerializer(serializers.HyperlinkedModelSerializer):
             'created_date',
             'user',
             'provider',
+            'units_bought',
+            'total_spent',
             'entry_purchases'
         )    
         read_only_fields = ('created_date', 'user')
         
-
+class ClientSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Client
+        fields = (
+            'pk',
+            'name',
+            'phone',
+            'tice',
+        )

@@ -74,6 +74,15 @@ urlpatterns = [
         name=views.PurchaseDetail.name
     ),
 
+    url(r'^clients/$',
+        views.ClientList.as_view(),
+        name=views.ClientList.name
+    ),
+    url(r'^clients/(?P<pk>[0-9]+)$',
+        views.ClientDetail.as_view(),
+        name=views.ClientDetail.name
+    ),
+
     url(r'^$',
         views.ApiRoot.as_view(),
         name=views.ApiRoot.name),

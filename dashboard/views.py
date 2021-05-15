@@ -11,9 +11,9 @@ from dashboard.custom_filters import (EntryFilter, ExitFilter, ProductFilter,
 from dashboard.custom_permissions import (IsCurrentUserOwnerOrAdmin,
                                           IsSuperUserOrReadOnly)
 
-from .models import (Brand, Catalogue, Entry, Exit, Product, Provider,
+from .models import (Brand, Catalogue, Client, Entry, Exit, Product, Provider,
                      Purchase, Sale)
-from .serializers import (BrandSerializer, CatalogueSerializer,
+from .serializers import (BrandSerializer, CatalogueSerializer, ClientSerializer,
                           EntrySerializer, ExitSerializer, ProductSerializer,
                           ProviderSerializer, PurchaseSerializer,
                           SaleSerializer)
@@ -294,6 +294,31 @@ class PurchaseDetail(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = DASHBOARD_AUTH_CLASSES
     permission_classes = (IsAuthenticated, IsCurrentUserOwnerOrAdmin)
 
+
+class ClientList(generics.ListCreateAPIView):
+    queryset = Client.objects.all()
+    serializer_class = ClientSerializer
+    name = 'client-list'
+
+    authentication_classes = DASHBOARD_AUTH_CLASSES
+    permission_classes = (IsAuthenticated, IsSuperUserOrReadOnly)
+
+    search_fields = (
+        '$name',
+        '$tice'
+    )
+    ordering_fields = (
+        'name',
+    )
+
+class ClientDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Client.objects.all()
+    serializer_class = ClientSerializer
+    name = 'client-detail'
+
+    authentication_classes = DASHBOARD_AUTH_CLASSES
+    permission_classes = (IsAuthenticated, IsSuperUserOrReadOnly)
+
 class ApiRoot(generics.GenericAPIView):
     name = 'api-root'
 
@@ -307,4 +332,5 @@ class ApiRoot(generics.GenericAPIView):
             'sale-list': reverse(SaleList.name, request=request),
             'entry-list': reverse(EntryList.name, request=request),
             'purchase-list': reverse(PurchaseList.name, request=request),
+            'client-list': reverse(ClientList.name, request=request),
             })
