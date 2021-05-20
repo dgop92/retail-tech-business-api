@@ -39,6 +39,10 @@ class EntryExitFilterBase(FilterSet):
 
 class ExitFilter(EntryExitFilterBase):
 
+    client = AllValuesFilter(
+        field_name = 'client__tice',
+    )
+
     class Meta:
         model = Exit
         fields = (
