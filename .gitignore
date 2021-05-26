@@ -4,3 +4,4 @@ db.sqlite3
 .pytest_cache
 .env
 populate_helper.py
+dashboard/dashboard_queries.sql

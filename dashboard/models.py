@@ -110,7 +110,7 @@ class Exit(models.Model):
             total_sold=Sum(
                 F('amount') * F('unit_price'), output_field=DecimalField()
             )
-        )['total_sold']
+        )['total_sold'] or 0
 
 
 class Entry(models.Model):
@@ -140,7 +140,7 @@ class Entry(models.Model):
             total_spent=Sum(
                 F('amount') * F('unit_price'), output_field=DecimalField()
             )
-        )['total_spent']
+        )['total_spent'] or 0
 
 class Purchase(models.Model):
 

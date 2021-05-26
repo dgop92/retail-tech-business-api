@@ -1,3 +1,4 @@
+from dashboard import query_views
 from django.conf.urls import url
 from dashboard import views
 
@@ -81,6 +82,22 @@ urlpatterns = [
     url(r'^clients/(?P<pk>[0-9]+)$',
         views.ClientDetail.as_view(),
         name=views.ClientDetail.name
+    ),
+    
+    url(r'^queries/monthly_status/(?P<month>0[1-9]|1[0-2])$',
+        query_views.monthly_status       
+    ),
+
+    url(r'^queries/daily_sales_by_month/(?P<month>0[1-9]|1[0-2])$',
+        query_views.daily_sales_by_month       
+    ),
+
+    url(r'^queries/best_products/$',
+        query_views.best_products      
+    ),
+
+    url(r'^queries/product_with_few_stocks/$',
+        query_views.product_with_few_stocks      
     ),
 
     url(r'^$',
