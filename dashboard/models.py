@@ -103,7 +103,7 @@ class Exit(models.Model):
         ordering = ('created_date', )
 
     def get_units_sold(self):
-        return self.exit_sales.count()
+        return self.exit_sales.aggregate(Sum('amount'))['amount__sum']
     
     def total_amount_sold(self):
         return self.exit_sales.aggregate(
@@ -133,7 +133,7 @@ class Entry(models.Model):
         ordering = ('created_date', )
 
     def get_units_bought(self):
-        return self.entry_purchases.count()
+        return self.entry_purchases.aggregate(Sum('amount'))['amount__sum']
     
     def total_amount_spent(self):
         return self.entry_purchases.aggregate(

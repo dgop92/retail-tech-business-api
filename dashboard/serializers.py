@@ -206,7 +206,7 @@ class ExitSerializer(serializers.HyperlinkedModelSerializer):
     )
 
     client = serializers.SlugRelatedField(queryset=Client.objects.all(),
-		slug_field='tice', required=False, error_messages = {
+		slug_field='tice', required=False, allow_null=True, error_messages = {
             'does_not_exist': _("Client with name {value} doesn't exit"),
         }
     )
