@@ -28,8 +28,8 @@ SECRET_KEY = os.environ.get(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = (os.environ.get('DEBUG_VALUE', 'True') == 'True')
 
-ALLOWED_HOSTS = ['retail-tech-business-api.herokuapp.com', '127.0.0.1', 'testserver']
-
+allow_host_list = os.environ.get('ALLOWED_HOSTS_LIST', '')
+ALLOWED_HOSTS = allow_host_list.split(',')
 
 # Application definition
 

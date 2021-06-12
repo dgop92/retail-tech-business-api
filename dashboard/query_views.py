@@ -112,7 +112,8 @@ def best_products(request):
 @permission_classes([IsSuperUser])
 def product_with_few_stocks(request):
 
-    results = Product.objects.filter(Q(stock__gt=0) & Q(stock__lte=10))[:5]
+    results = Product.objects.filter(Q(stock__gt=0) & Q(stock__lte=10)) \
+        .order_by('-stock')[:5]
     products = [p.name for p in results]
     stocks = [p.stock for p in results]
     
