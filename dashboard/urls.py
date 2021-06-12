@@ -100,7 +100,4 @@ urlpatterns = [
         query_views.product_with_few_stocks      
     ),
 
-    url(r'^$',
-        views.ApiRoot.as_view(),
-        name=views.ApiRoot.name),
 ]

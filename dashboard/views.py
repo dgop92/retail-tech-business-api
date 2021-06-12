@@ -1,10 +1,7 @@
 from account.custom_auth import BearerTokenAuthentication
-from django.db.models import ProtectedError
 from django.utils.translation import gettext_lazy as _
-from rest_framework import generics, status
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.reverse import reverse
 
 from dashboard.custom_filters import (EntryFilter, ExitFilter, ProductFilter,
                                       PurchaseFilter, SaleFilter)
@@ -20,7 +17,7 @@ from .serializers import (BrandSerializer, CatalogueSerializer, ClientSerializer
 
 DASHBOARD_AUTH_CLASSES = (BearerTokenAuthentication, )
 
-class BrandList(generics.ListCreateAPIView):
+class BrandList(generics.ListAPIView):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
     name = 'brand-list'
@@ -35,7 +32,7 @@ class BrandList(generics.ListCreateAPIView):
         'name',
         )
 
-class BrandDetail(generics.RetrieveUpdateDestroyAPIView):
+class BrandDetail(generics.RetrieveAPIView):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
     name = 'brand-detail'
@@ -43,19 +40,8 @@ class BrandDetail(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = DASHBOARD_AUTH_CLASSES
     permission_classes = (IsAuthenticated, IsSuperUserOrReadOnly)
 
-    def delete(self, request, *args, **kwargs):
-        try:
-            self.destroy(request, *args, **kwargs) 
-        except ProtectedError:
-            return Response(
-                status = status.HTTP_423_LOCKED, 
-                data = {'detail': _("this brand is in use")}
-            )
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class CatalogueList(generics.ListCreateAPIView):
+class CatalogueList(generics.ListAPIView):
     queryset = Catalogue.objects.all()
     serializer_class = CatalogueSerializer
     name = 'catalogue-list'
@@ -70,7 +56,7 @@ class CatalogueList(generics.ListCreateAPIView):
         'name',
         )
 
-class CatalogueDetail(generics.RetrieveUpdateDestroyAPIView):
+class CatalogueDetail(generics.RetrieveAPIView):
     queryset = Catalogue.objects.all()
     serializer_class = CatalogueSerializer
     name = 'catalogue-detail'
@@ -78,18 +64,7 @@ class CatalogueDetail(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = DASHBOARD_AUTH_CLASSES
     permission_classes = (IsAuthenticated, IsSuperUserOrReadOnly)
 
-    def delete(self, request, *args, **kwargs):
-        try:
-            self.destroy(request, *args, **kwargs) 
-        except ProtectedError:
-            return Response(
-                status = status.HTTP_423_LOCKED, 
-                data = {'detail': _("this catalogue is in use")}
-            )
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-class ProductList(generics.ListCreateAPIView):
+class ProductList(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     name = 'product-list'
@@ -109,7 +84,7 @@ class ProductList(generics.ListCreateAPIView):
         'sale_price',
     )
 
-class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
+class ProductDetail(generics.RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     name = 'product-detail'
@@ -117,21 +92,8 @@ class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = DASHBOARD_AUTH_CLASSES
     permission_classes = (IsAuthenticated, IsSuperUserOrReadOnly)
 
-    def delete(self, request, *args, **kwargs):
-        try:
-            self.destroy(request, *args, **kwargs) 
-        except ProtectedError:
-            return Response(
-                status = status.HTTP_423_LOCKED, 
-                data = {'detail': _("this product is in use")}
-            )
-        except Exception as e:
-            return Response(status=status.HTTP_423_LOCKED, 
-                data={'detail': str(e)})
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-class ProviderList(generics.ListCreateAPIView):
+class ProviderList(generics.ListAPIView):
     queryset = Provider.objects.all()
     serializer_class = ProviderSerializer
     name = 'provider-list'
@@ -147,7 +109,7 @@ class ProviderList(generics.ListCreateAPIView):
     )
 
 
-class ProviderDetail(generics.RetrieveUpdateDestroyAPIView):
+class ProviderDetail(generics.RetrieveAPIView):
     queryset = Provider.objects.all()
     serializer_class = ProviderSerializer
     name = 'provider-detail'
@@ -156,7 +118,7 @@ class ProviderDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, IsSuperUserOrReadOnly)
 
 
-class ExitList(generics.ListCreateAPIView):
+class ExitList(generics.ListAPIView):
     serializer_class = ExitSerializer
     name = 'exit-list'
 
@@ -174,10 +136,7 @@ class ExitList(generics.ListCreateAPIView):
             return Exit.objects.all()
         return Exit.objects.filter(user = self.request.user)
 
-    def perform_create(self, serializer):
-        serializer.save(user = self.request.user)
-
-class ExitDetail(generics.RetrieveUpdateDestroyAPIView):
+class ExitDetail(generics.RetrieveAPIView):
     queryset = Exit.objects.all()
     serializer_class = ExitSerializer
     name = 'exit-detail'
@@ -185,19 +144,8 @@ class ExitDetail(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = DASHBOARD_AUTH_CLASSES
     permission_classes = (IsAuthenticated, IsCurrentUserOwnerOrAdmin)
 
-    def delete(self, request, *args, **kwargs):
-        try:
-            self.destroy(request, *args, **kwargs) 
-        except ProtectedError:
-            return Response(
-                status = status.HTTP_423_LOCKED, 
-                data = {'detail': _("this exit is in use")}
-            )
-        
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-class SaleList(generics.ListCreateAPIView):
+class SaleList(generics.ListAPIView):
     serializer_class = SaleSerializer
     name = 'sale-list'
 
@@ -217,7 +165,7 @@ class SaleList(generics.ListCreateAPIView):
             return Sale.objects.all()
         return Sale.objects.filter(exit__user = self.request.user)
 
-class SaleDetail(generics.RetrieveUpdateDestroyAPIView):
+class SaleDetail(generics.RetrieveAPIView):
     queryset = Sale.objects.all()
     serializer_class = SaleSerializer
     name = 'sale-detail'
@@ -226,7 +174,7 @@ class SaleDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, IsCurrentUserOwnerOrAdmin)
 
 
-class EntryList(generics.ListCreateAPIView):
+class EntryList(generics.ListAPIView):
     serializer_class = EntrySerializer
     name = 'entry-list'
 
@@ -244,10 +192,7 @@ class EntryList(generics.ListCreateAPIView):
             return Entry.objects.all()
         return Entry.objects.filter(user = self.request.user)
 
-    def perform_create(self, serializer):
-        serializer.save(user = self.request.user)
-
-class EntryDetail(generics.RetrieveUpdateDestroyAPIView):
+class EntryDetail(generics.RetrieveAPIView):
     queryset = Entry.objects.all()
     serializer_class = EntrySerializer
     name = 'entry-detail'
@@ -255,18 +200,8 @@ class EntryDetail(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = DASHBOARD_AUTH_CLASSES
     permission_classes = (IsAuthenticated, IsCurrentUserOwnerOrAdmin)
 
-    def delete(self, request, *args, **kwargs):
-        try:
-            self.destroy(request, *args, **kwargs) 
-        except ProtectedError:
-            return Response(
-                status = status.HTTP_423_LOCKED, 
-                data = {'detail': _("this entry is in use")}
-            )
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
     
-class PurchaseList(generics.ListCreateAPIView):
+class PurchaseList(generics.ListAPIView):
     serializer_class = PurchaseSerializer
     name = 'purchase-list'
 
@@ -286,7 +221,7 @@ class PurchaseList(generics.ListCreateAPIView):
             return Purchase.objects.all()
         return Purchase.objects.filter(entry__user = self.request.user)
 
-class PurchaseDetail(generics.RetrieveUpdateDestroyAPIView):
+class PurchaseDetail(generics.RetrieveAPIView):
     queryset = Purchase.objects.all()
     serializer_class = PurchaseSerializer
     name = 'purchase-detail'
@@ -295,7 +230,7 @@ class PurchaseDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, IsCurrentUserOwnerOrAdmin)
 
 
-class ClientList(generics.ListCreateAPIView):
+class ClientList(generics.ListAPIView):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
     name = 'client-list'
@@ -311,26 +246,10 @@ class ClientList(generics.ListCreateAPIView):
         'name',
     )
 
-class ClientDetail(generics.RetrieveUpdateDestroyAPIView):
+class ClientDetail(generics.RetrieveAPIView):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
     name = 'client-detail'
 
     authentication_classes = DASHBOARD_AUTH_CLASSES
     permission_classes = (IsAuthenticated, IsSuperUserOrReadOnly)
-
-class ApiRoot(generics.GenericAPIView):
-    name = 'api-root'
-
-    def get(self, request, *args, **kwargs):
-        return Response({
-            'brand-list': reverse(BrandList.name, request=request),
-            'catalogue-list': reverse(CatalogueList.name, request=request),
-            'product-list': reverse(ProductList.name, request=request),
-            'provider-list': reverse(ProviderList.name, request=request),
-            'exit-list': reverse(ExitList.name, request=request),
-            'sale-list': reverse(SaleList.name, request=request),
-            'entry-list': reverse(EntryList.name, request=request),
-            'purchase-list': reverse(PurchaseList.name, request=request),
-            'client-list': reverse(ClientList.name, request=request),
-            })

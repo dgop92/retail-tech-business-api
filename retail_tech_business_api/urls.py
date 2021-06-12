@@ -15,7 +15,7 @@ Including another URLconf
 """
 import rest_auth.views as rest_auth_views
 from account.urls import (login_view_name, logout_view_name,
-                          password_change_name, user_view_name)
+                          user_view_name)
 from account.views import ACCOUNT_AUTH_CLASSES
 from django.conf.urls import include, url
 from django.urls import include
@@ -41,19 +41,4 @@ urlpatterns = [
         ), 
         name = user_view_name
     ),
-
-    url(r'^auth/password/change/$', 
-        rest_auth_views.PasswordChangeView.as_view(
-            authentication_classes = ACCOUNT_AUTH_CLASSES
-        ), 
-        name = password_change_name),
-
-    url(r'^auth/password_reset/', 
-        include(
-            'django_rest_passwordreset.urls', 
-            namespace = 'password_reset'
-        )
-    ),
-    
-    url(r'^account/', include('account.urls'))
 ]
