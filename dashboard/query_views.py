@@ -4,6 +4,7 @@ from calendar import monthrange
 import pytz
 from account.custom_auth import BearerTokenAuthentication
 from django.db.models.expressions import ExpressionWrapper, F
+from django.db.models import Sum, Q
 from django.db.models.fields import DecimalField
 from rest_framework.decorators import (
     api_view,
@@ -82,17 +83,17 @@ def daily_sales_by_month(request, month):
 @permission_classes([IsSuperUser])
 def best_products(request):
 
-    results_by_sales = Sale.objects.annotate(
+    results_by_sales = Sale.objects.values('product__code', 'product__name').annotate(
         sold=ExpressionWrapper(
-            F("amount") * F("unit_price"), output_field=DecimalField()
+            Sum(F("amount") * F("unit_price")), output_field=DecimalField()
         )
     ).order_by("-sold")[:5]
 
-    products = [s.product.name for s in results_by_sales]
-    prices = [s.sold for s in results_by_sales]
+    products = [s['product__name'] for s in results_by_sales]
+    prices = [s['sold'] for s in results_by_sales]
 
     remainder = 5 - len(products)
-    for i in range(remainder):
+    for _ in range(remainder):
         products.append("No Producto")
         prices.append(0)
 
@@ -111,12 +112,12 @@ def best_products(request):
 @permission_classes([IsSuperUser])
 def product_with_few_stocks(request):
 
-    results = Product.objects.filter(stock__gt=0).order_by("stock")[:5]
+    results = Product.objects.filter(Q(stock__gt=0) & Q(stock__lte=10))[:5]
     products = [p.name for p in results]
     stocks = [p.stock for p in results]
     
     remainder = 5 - len(products)
-    for i in range(remainder):
+    for _ in range(remainder):
         products.append("No Producto")
         stocks.append(0)
     
