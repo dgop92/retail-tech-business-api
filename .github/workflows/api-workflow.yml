@@ -5,9 +5,9 @@ name: Retail Tech Business API
 
 on:
   push:
-    branches: [ master ]
+    branches: [ preview-api ]
   pull_request:
-    branches: [ master ]
+    branches: [ preview-api ]
 
 jobs:
   build:
