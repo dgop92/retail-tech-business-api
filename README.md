@@ -25,3 +25,7 @@ python manage.py runserver
 ## API reference
 
 The API reference was created using postman. [Go to Docs](https://documenter.getpostman.com/view/12352026/TVsxB6Z3)
+
+## Database ERD
+
+![Database Diagram](docs/database-erd.png "Database Diagram")
